@@ -1,2 +1,2 @@
 #!/bin/bash
-chwon a+rwx
+chmod a+rwx
