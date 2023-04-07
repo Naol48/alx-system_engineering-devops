@@ -1,25 +1,13 @@
 #!/usr/bin/env bash
-# Bash script that will display information about subdomains.
+# Checks subdomain and DNS records
 
-domain="${1}"
-subdomain="${2}"
-
-get_information() {
-		info[0]=$(echo "${search}" | awk '{print $4}')
-		info[1]=$(echo "${search}" | awk '{print $5}')
-}
-
-
-if [ "${#}" -ge 2 ]
+sdms=$2
+if [ "$#" -eq 1 ]
 then
-		search=$(dig "${subdomain}.${domain}" | grep -A1 'ANSWER SECTION:' | tail -1)
-		get_information "${search}"
-		echo "The subdomain ${subdomain} is a ${info[0]} record and points to ${info[1]}"
-else
-		for sub in "www" "lb-01" "web-01" "web-02"
-		do
-				search=$(dig "${sub}.${domain}" | grep -A1 'ANSWER SECTION:' | tail -1)
-				get_information "${search}"
-				echo "The subdomain ${sub} is a ${info[0]} record and points to ${info[1]}"
-		done
+    sdms="www lb-01 web-01 web-02"
 fi
+for sdm in $sdms
+do
+    output=$(dig "$sdm.$1" | grep -A1 'ANSWER SECTION:' | tail -1 | awk '{ print "is a " $4 " record and points to " $5}')
+    echo "The subdomain $sdm $output"
+done
