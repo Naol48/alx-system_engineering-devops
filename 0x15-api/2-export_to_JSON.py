@@ -1,25 +1,32 @@
 #!/usr/bin/python3
-# using this REST API, for a given employee ID,
-# returns information about his/her TODO list progress
-# to export data in the JSON format.
-import json
-from requests import get
-from sys import argv
-
-
-def api_to_json(user_id):
-    task_list = []
-    url = "https://jsonplaceholder.typicode.com/"
-    user = get(url + "users/{}".format(user_id)).json()
-    tasks = get(url + "todos?userId={}".format(user_id)).json()
-    for task in tasks:
-        tdict = {}
-        tdict["task"] = task.get("title")
-        tdict["completed"] = task.get("completed")
-        tdict["username"] = user.get("username")
-        task_list.append(tdict)
-    with open("{}.json".format(user_id), 'w', newline='') as json_file:
-        json.dump({argv[1]: task_list}, json_file)
+"""Python script to export data in the JSON format."""
 
 if __name__ == "__main__":
-    api_to_json(int(argv[1]))
+    import json
+    import requests
+    import sys
+
+    id = int(sys.argv[1])
+    base_url = "https://jsonplaceholder.typicode.com/users/"
+    url_user = "{:s}{:d}".format(base_url, id)
+    url_todos = "{:s}{:d}/todos".format(base_url, id)
+
+    response_user = requests.get(url_user).json()
+
+    response_todos = requests.get(url_todos).json()
+
+    with open('./{}.json'.format(id), 'w', encoding="UTF-8") as f:
+        obj = {
+            id: [],
+        }
+        for member in response_todos:
+            task_title = member.get("title")
+            task_completed_status = member.get("completed")
+            username = response_user.get("username")
+            new_obj = {
+                "task": task_title,
+                "completed": task_completed_status,
+                "username": username,
+            }
+            obj[id].append(new_obj)
+        json.dump(obj, f, indent=4)

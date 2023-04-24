@@ -1,23 +1,26 @@
 #!/usr/bin/python3
-# using this REST API, for a given employee ID,
-# returns information about his/her TODO list progress.
-from requests import get
-from sys import argv
-
-
-def get_data_api(user_id):
-    done = []
-    url = "https://jsonplaceholder.typicode.com/"
-    user = get(url + "users/{}".format(user_id)).json()
-    tasks = get(url + "todos?userId={}".format(user_id)).json()
-    for task in tasks:
-        if task.get("completed"):
-            done.append(task.get("title"))
-    print("Employee {} is done with tasks({}/{}):"
-          .format(user["name"], len(done), len(tasks)))
-    for task in done:
-        print("\t {}".format(task))
-
+"""Python script that, using this REST API, for a given employee ID,
+returns information about his/her TODO list progress."""
 
 if __name__ == "__main__":
-    get_data_api(int(argv[1]))
+    import requests
+    import sys
+
+    id = int(sys.argv[1])
+    base_url = "https://jsonplaceholder.typicode.com/users/"
+    url_user = "{:s}{:d}".format(base_url, id)
+    url_todos = "{:s}{:d}/todos".format(base_url, id)
+    url_todos_true = "{:s}?completed=true".format(url_todos)
+
+    response_user = requests.get(url_user).json()
+
+    response_todos = requests.get(url_todos).json()
+    long_response = len(response_todos)
+
+    response_todos_true = requests.get(url_todos_true).json()
+    long_response_true = len(response_todos_true)
+
+    print("Employee {:s} is done with tasks({:d}/{:d}):".format(
+          response_user.get("name"), long_response_true, long_response))
+    for task_done in response_todos_true:
+        print("\t {:s}".format(task_done.get("title")))
